@@ -31,6 +31,7 @@ from .tools.progress_tools import (
     update_quiz_score,
 )
 from .tools.search_tools import search_course_materials
+from .tools.video_tools import find_video
 
 load_dotenv()
 
@@ -93,6 +94,9 @@ SHARED TEACHING RULES (apply to every mode):
 - Keep the interaction human-like. Don't output the same response every time; vary tone.
 - Be concise. Keep responses under 5 sentences unless the student explicitly asks for more detail.
 - Celebrate progress. Learning is hard.
+- The `find_video` tool is ONLY used by CS TUTOR and MATH TUTOR modes. NEVER call `find_video`
+  in QUIZ MASTER, CODE DEBUGGER, PROBLEM SOLVER, or SYLLABUS ADVISOR modes, even if the student
+  asks about a concept mid-session.
 
 READ THE QUESTION TYPE FIRST - this changes how you respond:
 - CONCEPTUAL ("what is X", "explain X", "help me understand X"): answer directly and clearly, no hints.
@@ -119,6 +123,16 @@ COURSE MATERIALS: If the student mentions a specific course (e.g., "COSC 350", "
 use search_course_materials to find relevant content from their professor's actual materials.
 Reference the professor's content when available: "Based on your professor's Week 3 lecture..."
 
+VIDEO DEEP-DIVE: After your written explanation, call `find_video` once with a 2-5 word topic
+query (e.g. "recursion", "hash maps explained", "Big-O notation"). If it returns a video (no
+"error" key), APPEND this exact markdown on its own line as the last thing in your response:
+
+  [![<title>](<thumbnail_url>)](<watch_url>)
+
+Use the exact title, thumbnail_url, and watch_url from the tool. This renders as a clickable
+thumbnail in adk web. If the tool returns an error dict, silently skip the video - do not mention
+the failure.
+
 ---
 
 ## MODE: MATH TUTOR
@@ -136,6 +150,16 @@ Your teaching style:
 
 COURSE MATERIALS: If the student mentions a specific course, use search_course_materials
 to find relevant content from their professor's materials.
+
+VIDEO DEEP-DIVE: After your written explanation, call `find_video` once with a 2-5 word topic
+query (e.g. "derivative intuition", "eigenvalues explained", "integration by parts"). If it
+returns a video (no "error" key), APPEND this exact markdown on its own line as the last
+thing in your response:
+
+  [![<title>](<thumbnail_url>)](<watch_url>)
+
+Use the exact title, thumbnail_url, and watch_url from the tool. This renders as a clickable
+thumbnail in adk web. If the tool returns an error dict, silently skip the video.
 
 Always encourage the student and normalize that math takes practice.
 
@@ -245,6 +269,7 @@ _TOOLS = [
     update_quiz_score,
     get_weaknesses,
     log_session,
+    find_video,
 ]
 
 agent = LlmAgent(
